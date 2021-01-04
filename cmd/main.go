@@ -9,6 +9,7 @@ import (
 	"os/signal"
 	"runtime/pprof"
 	"runtime/trace"
+	"strconv"
 	"syscall"
 	"time"
 
@@ -24,9 +25,25 @@ const(
 var (
 	times = 1000
 	users = 100000
+	port = "6060"
 )
 
 func main() {
+	if len(os.Args) < 4{
+		panic("error args")
+	}
+	us, _ := strconv.ParseInt(os.Args[1], 10, 64)
+	ts, _ := strconv.ParseInt(os.Args[2], 10, 64)
+	port = os.Args[3]
+	if us == 0 {
+		panic("err users number")
+	}
+	if ts == 0 {
+		panic("err times number")
+	}
+	if port == "" {
+		panic("err port number")
+	}
 	if _trace {
 		f, err := os.Create("trace.out")
 		if err != nil {
@@ -54,31 +71,29 @@ func main() {
 	}
 
 	if _pprof_net{
-		go http.ListenAndServe("localhost:6060", nil)
+		go http.ListenAndServe(fmt.Sprintf(":%v", port), nil)
 	}
 
 	tp := dtask.NewTaskPool(10)
 	go func() {
 		start := time.Now()
 		for j:=0 ; j < users; j++ {
-			tk := tp.Add(time.Second * 2)
 			go func() {
 				for i := 0; i < times; i++ {
 					//time.Sleep(500 * time.Millisecond)
-					tk.Add(string(i), func(i int) func() {
+					tk := tp.Add(time.Second * 2, func(i int) func() {
 						return func() {
 							time.Sleep(1 * time.Second)
 							//fmt.Printf("i am:%v\n", i)
 							//tk.Done(string(i))
 						}
 					}(i))
+					go func(tk *dtask.Task) {
+						time.Sleep(time.Second * 5)
+						tp.Del(tk)
+					}(tk)
 				}
 			}()
-
-			go func(tk *dtask.Task) {
-				time.Sleep(time.Second * 5)
-				tp.Del(tk)
-			}(tk)
 		}
 		cost := time.Since(start)
 		fmt.Printf("cost=[%s]",cost)

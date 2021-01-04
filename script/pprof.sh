@@ -1,5 +1,5 @@
 #!/bin/bash
-default_url="http://localhost:6060"
+default_url="http://172.16.101.107:16060"
 default_prefix="debug/pprof"
 default_type="profile"
 
