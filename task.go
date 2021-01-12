@@ -1,8 +1,6 @@
 package dtask
 
 import (
-	//"gitlab.33.cn/chat/im/api/comet/grpc"
-	"github.com/oofpgDLD/dtask/proto"
 	"sync"
 	"time"
 
@@ -19,8 +17,8 @@ type Task struct {
 	Key        string
 	expire     time.Time
 	dur        time.Duration
-	fn         func(map[string]*proto.Proto)
-	protoStore map[string]*proto.Proto
+	fn         func(map[string][]byte)
+	protoStore map[string][]byte
 	index      int
 	next       *Task
 }
@@ -35,9 +33,9 @@ func (tk *Task) ExpireString() string {
 	return tk.expire.Format(timerFormat)
 }
 
-func (tk *Task) Add(id string, p *proto.Proto) {
+func (tk *Task) Add(id string, data []byte) {
 	tk.Lock()
-	tk.protoStore[id] = p
+	tk.protoStore[id] = data
 	tk.Unlock()
 }
 
@@ -152,13 +150,13 @@ func (t *TaskPool) del(tk *Task) {
 	}
 }
 
-func (t *TaskPool) Add(dur time.Duration, fn func(map[string]*proto.Proto)) (tk *Task) {
+func (t *TaskPool) Add(dur time.Duration, fn func(map[string][]byte)) (tk *Task) {
 	t.lock.Lock()
 	tk = t.get()
 	tk.expire = time.Now().Add(dur)
 	tk.fn = fn
 	tk.dur = dur
-	tk.protoStore = make(map[string]*proto.Proto)
+	tk.protoStore = make(map[string][]byte)
 	t.add(tk)
 	t.lock.Unlock()
 	return
@@ -193,7 +191,7 @@ func (t *TaskPool) start() {
 // It is equivalent to Del(0).
 func (t *TaskPool) expire() {
 	var (
-		fn func(map[string]*proto.Proto)
+		fn func(map[string][]byte)
 		tk *Task
 		d  time.Duration
 	)

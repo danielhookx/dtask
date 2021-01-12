@@ -3,11 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="02f67632-cfb1-40fa-8183-92b4149a6034" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmd/cli_task" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/cli_task" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmd/client/cli" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/client/cli" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmd/client/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/client/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmd/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/proto/proto.go" beforeDir="false" afterPath="$PROJECT_DIR$/proto/proto.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/task.go" beforeDir="false" afterPath="$PROJECT_DIR$/task.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
