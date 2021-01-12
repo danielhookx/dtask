@@ -4,9 +4,11 @@
     <list default="true" id="02f67632-cfb1-40fa-8183-92b4149a6034" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmd/cli_task" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/cli_task" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmd/client/cli" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/client/cli" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmd/client/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/client/main.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmd/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/proto/proto.go" beforeDir="false" afterPath="$PROJECT_DIR$/proto/proto.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/task.go" beforeDir="false" afterPath="$PROJECT_DIR$/task.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -94,5 +96,9 @@
       <screen x="-1920" y="0" width="1920" height="1040" />
     </state>
     <state x="-1459" y="162" key="SettingsEditor/-1920.0.1920.1040/0.0.1920.1040@-1920.0.1920.1040" timestamp="1609315045991" />
+    <state x="-1218" y="138" key="refactoring.ChangeSignatureDialog" timestamp="1609839381390">
+      <screen x="-1920" y="0" width="1920" height="1040" />
+    </state>
+    <state x="-1218" y="138" key="refactoring.ChangeSignatureDialog/-1920.0.1920.1040/0.0.1920.1040@-1920.0.1920.1040" timestamp="1609839381390" />
   </component>
 </project>

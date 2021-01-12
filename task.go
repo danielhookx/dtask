@@ -1,6 +1,8 @@
 package dtask
 
 import (
+	//"gitlab.33.cn/chat/im/api/comet/grpc"
+	"github.com/oofpgDLD/dtask/proto"
 	"sync"
 	"time"
 
@@ -13,11 +15,14 @@ const (
 )
 
 type Task struct {
-	Key    string
-	expire time.Time
-	fn     func()
-	index  int
-	next   *Task
+	sync.RWMutex
+	Key        string
+	expire     time.Time
+	dur        time.Duration
+	fn         func(map[string]*proto.Proto)
+	protoStore map[string]*proto.Proto
+	index      int
+	next       *Task
 }
 
 // Delay delay duration.
@@ -29,11 +34,24 @@ func (tk *Task) Delay() time.Duration {
 func (tk *Task) ExpireString() string {
 	return tk.expire.Format(timerFormat)
 }
+
+func (tk *Task) Add(id string, p *proto.Proto) {
+	tk.Lock()
+	tk.protoStore[id] = p
+	tk.Unlock()
+}
+
+func (tk *Task) Del(id string) {
+	tk.Lock()
+	delete(tk.protoStore, id)
+	tk.Unlock()
+}
+
 //---------------------------------------------//
 type TaskPool struct {
-	lock sync.Mutex
-	free *Task
-	tasks []*Task
+	lock   sync.Mutex
+	free   *Task
+	tasks  []*Task
 	signal *time.Timer
 	num    int
 }
@@ -72,7 +90,7 @@ func (t *TaskPool) grow() {
 	tk.next = nil
 }
 
-func (t *TaskPool) get() (tk *Task){
+func (t *TaskPool) get() (tk *Task) {
 	if tk = t.free; tk == nil {
 		t.grow()
 		tk = t.free
@@ -83,6 +101,7 @@ func (t *TaskPool) get() (tk *Task){
 
 func (t *TaskPool) put(tk *Task) {
 	tk.fn = nil
+	tk.protoStore = nil
 	tk.next = t.free
 	t.free = tk
 }
@@ -133,11 +152,13 @@ func (t *TaskPool) del(tk *Task) {
 	}
 }
 
-func (t *TaskPool) Add(dur time.Duration, fn func()) (tk *Task){
+func (t *TaskPool) Add(dur time.Duration, fn func(map[string]*proto.Proto)) (tk *Task) {
 	t.lock.Lock()
 	tk = t.get()
 	tk.expire = time.Now().Add(dur)
 	tk.fn = fn
+	tk.dur = dur
+	tk.protoStore = make(map[string]*proto.Proto)
 	t.add(tk)
 	t.lock.Unlock()
 	return
@@ -172,7 +193,7 @@ func (t *TaskPool) start() {
 // It is equivalent to Del(0).
 func (t *TaskPool) expire() {
 	var (
-		fn func()
+		fn func(map[string]*proto.Proto)
 		tk *Task
 		d  time.Duration
 	)
@@ -191,7 +212,12 @@ func (t *TaskPool) expire() {
 		}
 		fn = tk.fn
 		// let caller put back
+		//---
 		t.del(tk)
+		tk.expire = time.Now().Add(tk.dur)
+		t.add(tk)
+		//---
+		//t.del(tk)
 		t.lock.Unlock()
 		if fn == nil {
 			log.Warning("expire timer no fn")
@@ -199,7 +225,7 @@ func (t *TaskPool) expire() {
 			if Debug {
 				log.Infof("timer key: %s, expire: %s, index: %d expired, call fn", tk.Key, tk.ExpireString(), tk.index)
 			}
-			fn()
+			fn(tk.protoStore)
 		}
 		t.lock.Lock()
 	}
@@ -209,7 +235,6 @@ func (t *TaskPool) expire() {
 	}
 	t.lock.Unlock()
 }
-
 
 func (t *TaskPool) up(j int) {
 	for {

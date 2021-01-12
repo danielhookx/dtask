@@ -22,8 +22,8 @@ var addr = flag.String("addr", "172.16.101.107:17070", "http service address")
 
 var (
 	closer = make(chan int, 1)
-	times  = 1000
-	users  = 1000
+	times  = 5
+	users  = 10000
 
 	u = url.URL{Scheme: "ws", Host: *addr, Path: "/test"}
 )
@@ -56,9 +56,10 @@ func main() {
 }
 
 func NewUser(id int, times int) {
+	uid := fmt.Sprint(id)
 	log.Printf("connecting to %s, id %v", u.String(), fmt.Sprint(id))
 	c, resp, err := websocket.DefaultDialer.Dial(u.String(), http.Header{
-		"FZM-UID" : {fmt.Sprint(id)},
+		"FZM-UID": {fmt.Sprint(id)},
 	})
 	if err != nil {
 		log.Fatal("dial:", err, resp, u.String())
@@ -88,7 +89,7 @@ func NewUser(id int, times int) {
 			return
 		case <-ticker.C:
 			seq++
-			msg, err := Msg(int64(seq))
+			msg, err := Msg(uid, int64(seq))
 			if err != nil {
 				log.Println("marshal proto:", err)
 				return
@@ -113,8 +114,9 @@ func NewUser(id int, times int) {
 	}
 }
 
-func Msg(seq int64) ([]byte, error) {
+func Msg(uid string, seq int64) ([]byte, error) {
 	p := &proto.Proto{
+		Uid: uid,
 		Opt: proto.Start,
 		Seq: seq,
 	}
@@ -133,7 +135,7 @@ func getInputByScanner() string {
 		}
 
 		index, err := strconv.ParseInt(str, 10, 64)
-		if err != nil{
+		if err != nil {
 			continue
 		}
 		closer <- int(index)

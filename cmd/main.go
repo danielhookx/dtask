@@ -118,11 +118,10 @@ var (
 
 func ServeWs(context *gin.Context) {
 	var (
-		userId string
-		tk     *dtask.Task
-		wCh    chan []byte
+		tk  *dtask.Task
+		wCh chan []byte
 	)
-	userId = context.GetHeader("FZM-UID")
+	//	userId = context.GetHeader("FZM-UID")
 	c, err := upgrader.Upgrade(context.Writer, context.Request, nil)
 	if err != nil {
 		log.Print("upgrade:", err)
@@ -130,8 +129,18 @@ func ServeWs(context *gin.Context) {
 	}
 	wCh = make(chan []byte)
 	defer c.Close()
-	defer onClose(userId, tk)
+	defer onClose(tk)
 	done := make(chan struct{})
+
+	tk = tp.Add(time.Second*2, func(pm map[string]*proto.Proto) {
+		for _, p := range pm {
+			data, err := json.Marshal(p)
+			if err != nil {
+				continue
+			}
+			wCh <- data
+		}
+	})
 
 	go func() {
 		defer close(done)
@@ -142,7 +151,7 @@ func ServeWs(context *gin.Context) {
 				return
 			}
 			log.Printf("recv: %s", message)
-			onRecvMsg(message)
+			onRecvMsg(tk, message)
 		}
 	}()
 
@@ -160,26 +169,21 @@ func ServeWs(context *gin.Context) {
 	}
 }
 
-func onRecvMsg(msg []byte) {
+func onRecvMsg(tk *dtask.Task, msg []byte) {
 	msg = bytes.TrimSpace(bytes.Replace(msg, newline, space, -1))
 	p := proto.Proto{}
 	json.Unmarshal(msg, &p)
 	switch p.Opt {
 	case proto.Start:
-		tp.Add(time.Second*2, func(i int64) func() {
-			return func() {
-				time.Sleep(1 * time.Second)
-				//fmt.Printf("i am:%v\n", i)
-				//tk.Done(string(i))
-			}
-		}(p.Seq))
+		tk.Add(string(p.Seq), &p)
 	case proto.Stop:
+		tk.Del(string(p.Seq))
 	default:
 	}
 }
 
-func onClose(userId string, tk *dtask.Task) {
-	if userId == "" || tk == nil {
+func onClose(tk *dtask.Task) {
+	if tk == nil {
 		log.Printf("onClose WsConnection args can not find")
 		return
 	}
