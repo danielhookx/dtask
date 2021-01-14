@@ -35,13 +35,17 @@ func (tk *Task) ExpireString() string {
 
 func (tk *Task) Add(id string, data []byte) {
 	tk.Lock()
-	tk.protoStore[id] = data
+	if tk.protoStore != nil {
+		tk.protoStore[id] = data
+	}
 	tk.Unlock()
 }
 
 func (tk *Task) Del(id string) {
 	tk.Lock()
-	delete(tk.protoStore, id)
+	if tk.protoStore != nil {
+		delete(tk.protoStore, id)
+	}
 	tk.Unlock()
 }
 
